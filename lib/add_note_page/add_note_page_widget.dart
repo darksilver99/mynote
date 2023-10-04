@@ -80,10 +80,16 @@ class _AddNotePageWidgetState extends State<AddNotePageWidget> {
                           autofocus: true,
                           obscureText: false,
                           decoration: InputDecoration(
-                            labelText: 'Title',
                             labelStyle:
                                 FlutterFlowTheme.of(context).labelMedium,
-                            hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                            hintText: 'deital...',
+                            hintStyle: FlutterFlowTheme.of(context)
+                                .labelMedium
+                                .override(
+                                  fontFamily: 'Readex Pro',
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                ),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                 color: FlutterFlowTheme.of(context).alternate,
@@ -114,7 +120,7 @@ class _AddNotePageWidgetState extends State<AddNotePageWidget> {
                             ),
                           ),
                           style: FlutterFlowTheme.of(context).bodyMedium,
-                          minLines: 1,
+                          maxLines: 8,
                           validator: _model.textControllerValidator
                               .asValidator(context),
                         ),

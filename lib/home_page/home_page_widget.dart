@@ -199,6 +199,39 @@ class _HomePageWidgetState extends State<HomePageWidget>
                           }.withoutNulls,
                         );
                       },
+                      onLongPress: () async {
+                        var confirmDialogResponse = await showDialog<bool>(
+                              context: context,
+                              builder: (alertDialogContext) {
+                                return AlertDialog(
+                                  title: Text('Delete?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(
+                                          alertDialogContext, false),
+                                      child: Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(
+                                          alertDialogContext, true),
+                                      child: Text('Confirm'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ) ??
+                            false;
+                        if (confirmDialogResponse) {
+                          await NoteListTable().delete(
+                            matchingRows: (rows) => rows.eq(
+                              'id',
+                              listViewNoteListRow.id,
+                            ),
+                          );
+                          setState(() => _model.requestCompleter = null);
+                          await _model.waitForRequestCompleted();
+                        }
+                      },
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
