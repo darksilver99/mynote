@@ -52,7 +52,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 1000));
       setState(() => _model.requestCompleter = null);
-      await _model.waitForRequestCompleted(minWait: 1500);
+      await _model.waitForRequestCompleted();
+      await Future.delayed(const Duration(milliseconds: 1000));
       setState(() {
         _model.isLoading = false;
       });
@@ -361,7 +362,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                 if (_model.isLoading)
                   Lottie.asset(
                     'assets/lottie_animations/animation_lnb7o3zu.json',
-                    width: 200.0,
+                    width: MediaQuery.sizeOf(context).width * 1.0,
                     height: 200.0,
                     fit: BoxFit.cover,
                     animate: true,
