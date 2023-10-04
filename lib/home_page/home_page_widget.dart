@@ -153,6 +153,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
           child: Container(
             height: MediaQuery.sizeOf(context).height * 1.0,
             child: Stack(
+              alignment: AlignmentDirectional(0.0, 0.0),
               children: [
                 if (!_model.isLoading)
                   FutureBuilder<List<NoteListRow>>(
@@ -358,15 +359,12 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     },
                   ),
                 if (_model.isLoading)
-                  Align(
-                    alignment: AlignmentDirectional(0.00, 0.00),
-                    child: Lottie.asset(
-                      'assets/lottie_animations/animation_lnb7o3zu.json',
-                      width: MediaQuery.sizeOf(context).width * 1.0,
-                      height: MediaQuery.sizeOf(context).height * 1.0,
-                      fit: BoxFit.cover,
-                      animate: true,
-                    ),
+                  Lottie.asset(
+                    'assets/lottie_animations/animation_lnb7o3zu.json',
+                    width: 200.0,
+                    height: 200.0,
+                    fit: BoxFit.cover,
+                    animate: true,
                   ),
               ],
             ),
