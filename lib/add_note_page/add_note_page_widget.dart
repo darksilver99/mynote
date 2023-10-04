@@ -298,7 +298,7 @@ class _AddNotePageWidgetState extends State<AddNotePageWidget> {
                           'create_by': currentUserUid,
                           'status': 1,
                           'title': _model.textController.text,
-                          'image': _model.imageList,
+                          'images': _model.imageList,
                         });
 
                         context.goNamed('HomePage');

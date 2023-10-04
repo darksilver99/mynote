@@ -35,7 +35,7 @@ class _NoteDetailPageWidgetState extends State<NoteDetailPageWidget> {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.imageCount = widget.noteParameter?.image?.length;
+      _model.imageCount = widget.noteParameter?.images?.length;
     });
   }
 
@@ -102,7 +102,7 @@ class _NoteDetailPageWidgetState extends State<NoteDetailPageWidget> {
                         child: Builder(
                           builder: (context) {
                             final imageList =
-                                widget.noteParameter?.image?.toList() ?? [];
+                                widget.noteParameter?.images?.toList() ?? [];
                             return GridView.builder(
                               padding: EdgeInsets.zero,
                               gridDelegate:

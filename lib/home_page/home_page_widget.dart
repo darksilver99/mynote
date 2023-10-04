@@ -278,7 +278,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                                     ),
                                   if ((listViewNoteListRow.title == null ||
                                           listViewNoteListRow.title == '') &&
-                                      (listViewNoteListRow.image.length > 0))
+                                      (listViewNoteListRow.images.length > 0))
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8.0),
                                       child: CachedNetworkImage(
@@ -287,7 +287,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                                         fadeOutDuration:
                                             Duration(milliseconds: 500),
                                         imageUrl:
-                                            listViewNoteListRow.image.first,
+                                            listViewNoteListRow.images.first,
                                         width: 70.0,
                                         height: 70.0,
                                         fit: BoxFit.cover,

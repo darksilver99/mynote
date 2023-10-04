@@ -29,6 +29,9 @@ class NoteListRow extends SupabaseDataRow {
   String? get title => getField<String>('title');
   set title(String? value) => setField<String>('title', value);
 
-  List<String> get image => getListField<String>('image');
-  set image(List<String>? value) => setListField<String>('image', value);
+  List<String> get images => getListField<String>('images');
+  set images(List<String>? value) => setListField<String>('images', value);
+
+  int? get seq => getField<int>('seq');
+  set seq(int? value) => setField<int>('seq', value);
 }
