@@ -192,8 +192,8 @@ class _NoteDetailPageWidgetState extends State<NoteDetailPageWidget> {
                             false;
                         if (confirmDialogResponse) {
                           while (_model.imageCount != 0) {
-                            await deleteSupabaseFileFromPublicUrl(
-                                widget.noteParameter!.image.first);
+                            await deleteSupabaseFileFromPublicUrl(widget
+                                .noteParameter!.image[_model.imageCount!]);
                             _model.imageCount = _model.imageCount! + -1;
                           }
                           await NoteListTable().delete(
