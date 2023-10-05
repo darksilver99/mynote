@@ -67,7 +67,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
             await showModalBottomSheet(
               isScrollControlled: true,
@@ -97,10 +97,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
           },
           backgroundColor: FlutterFlowTheme.of(context).primary,
           elevation: 8.0,
-          child: Icon(
-            Icons.add_outlined,
-            color: FlutterFlowTheme.of(context).primaryBackground,
-            size: 36.0,
+          label: Text(
+            'add',
+            style: FlutterFlowTheme.of(context).bodyMedium,
           ),
         ),
         appBar: AppBar(

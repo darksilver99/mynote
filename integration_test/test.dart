@@ -16,10 +16,10 @@ void main() async {
     await tester.pumpAndSettle();
     await tester.enterText(
         find.byKey(ValueKey('email_o6g0')), 'oosayaoo@hotmail.com');
-    await tester.enterText(find.byKey(ValueKey('password_5xae')), '0456045');
+    await tester.enterText(find.byKey(ValueKey('password_5xae')), '04560456');
     await tester.tap(find.byKey(ValueKey('Button_4jyt')));
     await tester.pumpAndSettle();
-    expect(find.text('status'), findsWidgets);
+    expect(find.text('add'), findsWidgets);
   });
 }
 
