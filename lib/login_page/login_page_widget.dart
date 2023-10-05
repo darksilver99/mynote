@@ -77,6 +77,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                         padding: EdgeInsetsDirectional.fromSTEB(
                             16.0, 16.0, 16.0, 0.0),
                         child: TextFormField(
+                          key: ValueKey('email_o6g0'),
                           controller: _model.emailController,
                           obscureText: false,
                           decoration: InputDecoration(
@@ -122,6 +123,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                         padding: EdgeInsetsDirectional.fromSTEB(
                             16.0, 16.0, 16.0, 0.0),
                         child: TextFormField(
+                          key: ValueKey('password_5xae'),
                           controller: _model.passwordController,
                           obscureText: !_model.passwordVisibility,
                           decoration: InputDecoration(
@@ -180,6 +182,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                         padding: EdgeInsetsDirectional.fromSTEB(
                             16.0, 16.0, 16.0, 0.0),
                         child: FFButtonWidget(
+                          key: ValueKey('Button_4jyt'),
                           onPressed: () async {
                             if (_model.formKey.currentState == null ||
                                 !_model.formKey.currentState!.validate()) {
