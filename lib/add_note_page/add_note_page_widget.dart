@@ -300,8 +300,7 @@ class _AddNotePageWidgetState extends State<AddNotePageWidget> {
                           'title': _model.textController.text,
                           'images': _model.imageList,
                         });
-
-                        context.goNamed('HomePage');
+                        context.safePop();
                       },
                       text: 'Save',
                       options: FFButtonOptions(

@@ -1,5 +1,6 @@
 import '/auth/supabase_auth/auth_util.dart';
 import '/backend/supabase/supabase.dart';
+import '/component/add_note_bottom_sheet/add_note_bottom_sheet_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -66,7 +67,30 @@ class _HomePageWidgetState extends State<HomePageWidget>
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            context.pushNamed('AddNotePage');
+            await showModalBottomSheet(
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              enableDrag: false,
+              context: context,
+              builder: (context) {
+                return GestureDetector(
+                  onTap: () => _model.unfocusNode.canRequestFocus
+                      ? FocusScope.of(context).requestFocus(_model.unfocusNode)
+                      : FocusScope.of(context).unfocus(),
+                  child: Padding(
+                    padding: MediaQuery.viewInsetsOf(context),
+                    child: AddNoteBottomSheetWidget(),
+                  ),
+                );
+              },
+            ).then((value) => safeSetState(() => _model.isSavedNote = value));
+
+            if (_model.isSavedNote!) {
+              setState(() => _model.requestCompleter = null);
+              await _model.waitForRequestCompleted();
+            }
+
+            setState(() {});
           },
           backgroundColor: FlutterFlowTheme.of(context).primary,
           elevation: 8.0,

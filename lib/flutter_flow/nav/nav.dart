@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
+import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
 import '../../auth/base_auth_user_provider.dart';
 
