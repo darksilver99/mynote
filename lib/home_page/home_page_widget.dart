@@ -1,11 +1,13 @@
 import '/auth/supabase_auth/auth_util.dart';
 import '/backend/supabase/supabase.dart';
 import '/component/add_note_bottom_sheet/add_note_bottom_sheet_widget.dart';
+import '/component/confirm_custom_dialog/confirm_custom_dialog_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:async';
+import 'package:aligned_dialog/aligned_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -86,7 +88,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
               },
             ).then((value) => safeSetState(() => _model.isSavedNote = value));
 
-            if (_model.isSavedNote!) {
+            if ((_model.isSavedNote != null) && _model.isSavedNote!) {
               setState(() => _model.requestCompleter = null);
               await _model.waitForRequestCompleted();
             }
@@ -209,142 +211,189 @@ class _HomePageWidgetState extends State<HomePageWidget>
                   itemBuilder: (context, listViewIndex) {
                     final listViewNoteListRow =
                         listViewNoteListRowList[listViewIndex];
-                    return InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        context.pushNamed(
-                          'NoteDetailPage',
-                          queryParameters: {
-                            'noteParameter': serializeParam(
-                              listViewNoteListRow,
-                              ParamType.SupabaseRow,
-                            ),
-                          }.withoutNulls,
-                        );
-                      },
-                      onLongPress: () async {
-                        var confirmDialogResponse = await showDialog<bool>(
-                              context: context,
-                              builder: (alertDialogContext) {
-                                return AlertDialog(
-                                  title: Text('Delete?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(
-                                          alertDialogContext, false),
-                                      child: Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(
-                                          alertDialogContext, true),
-                                      child: Text('Confirm'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ) ??
-                            false;
-                        if (confirmDialogResponse) {
-                          await NoteListTable().delete(
-                            matchingRows: (rows) => rows.eq(
-                              'id',
-                              listViewNoteListRow.id,
-                            ),
+                    return Builder(
+                      builder: (context) => InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          context.pushNamed(
+                            'NoteDetailPage',
+                            queryParameters: {
+                              'noteParameter': serializeParam(
+                                listViewNoteListRow,
+                                ParamType.SupabaseRow,
+                              ),
+                            }.withoutNulls,
                           );
-                          setState(() => _model.requestCompleter = null);
-                          await _model.waitForRequestCompleted();
-                        }
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: 100.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                            ),
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 8.0, 16.0, 8.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  if (listViewNoteListRow.title != null &&
-                                      listViewNoteListRow.title != '')
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              listViewNoteListRow.title!,
-                                              maxLines: 2,
-                                              style: FlutterFlowTheme.of(
-                                                      context)
-                                                  .bodyMedium
-                                                  .override(
-                                                    fontFamily: 'Readex Pro',
-                                                    fontSize: 20.0,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                            ),
-                                          ),
-                                        ],
+                        },
+                        onDoubleTap: () async {
+                          await showAlignedDialog(
+                            context: context,
+                            isGlobal: true,
+                            avoidOverflow: false,
+                            targetAnchor: AlignmentDirectional(0.0, 0.0)
+                                .resolve(Directionality.of(context)),
+                            followerAnchor: AlignmentDirectional(0.0, 0.0)
+                                .resolve(Directionality.of(context)),
+                            builder: (dialogContext) {
+                              return Material(
+                                color: Colors.transparent,
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      _model.unfocusNode.canRequestFocus
+                                          ? FocusScope.of(context)
+                                              .requestFocus(_model.unfocusNode)
+                                          : FocusScope.of(context).unfocus(),
+                                  child: ConfirmCustomDialogWidget(
+                                    title: 'Delete ?',
+                                    ok: 'Confirm',
+                                    cancel: 'Cancel',
+                                  ),
+                                ),
+                              );
+                            },
+                          ).then((value) =>
+                              safeSetState(() => _model.isConfirm = value));
+
+                          if ((_model.isConfirm != null) && _model.isConfirm!) {
+                            await NoteListTable().delete(
+                              matchingRows: (rows) => rows.eq(
+                                'id',
+                                listViewNoteListRow.id,
+                              ),
+                            );
+                            setState(() => _model.requestCompleter = null);
+                            await _model.waitForRequestCompleted();
+                          }
+
+                          setState(() {});
+                        },
+                        onLongPress: () async {
+                          var confirmDialogResponse = await showDialog<bool>(
+                                context: context,
+                                builder: (alertDialogContext) {
+                                  return AlertDialog(
+                                    title: Text('Delete?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                            alertDialogContext, false),
+                                        child: Text('Cancel'),
                                       ),
-                                    ),
-                                  if ((listViewNoteListRow.title == null ||
-                                          listViewNoteListRow.title == '') &&
-                                      (listViewNoteListRow.images.length > 0))
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: CachedNetworkImage(
-                                        fadeInDuration:
-                                            Duration(milliseconds: 500),
-                                        fadeOutDuration:
-                                            Duration(milliseconds: 500),
-                                        imageUrl:
-                                            listViewNoteListRow.images.first,
-                                        width: 70.0,
-                                        height: 70.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        dateTimeFormat('yMMMd',
-                                            listViewNoteListRow.createDate),
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium,
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                            alertDialogContext, true),
+                                        child: Text('Confirm'),
                                       ),
                                     ],
-                                  ),
-                                ],
+                                  );
+                                },
+                              ) ??
+                              false;
+                          if (confirmDialogResponse) {
+                            await NoteListTable().delete(
+                              matchingRows: (rows) => rows.eq(
+                                'id',
+                                listViewNoteListRow.id,
+                              ),
+                            );
+                            setState(() => _model.requestCompleter = null);
+                            await _model.waitForRequestCompleted();
+                          }
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              height: 100.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context)
+                                    .secondaryBackground,
+                              ),
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 8.0, 16.0, 8.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    if (listViewNoteListRow.title != null &&
+                                        listViewNoteListRow.title != '')
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                listViewNoteListRow.title!,
+                                                maxLines: 2,
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily:
+                                                              'Readex Pro',
+                                                          fontSize: 20.0,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    if ((listViewNoteListRow.title == null ||
+                                            listViewNoteListRow.title == '') &&
+                                        (listViewNoteListRow.images.length > 0))
+                                      ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: CachedNetworkImage(
+                                          fadeInDuration:
+                                              Duration(milliseconds: 500),
+                                          fadeOutDuration:
+                                              Duration(milliseconds: 500),
+                                          imageUrl:
+                                              listViewNoteListRow.images.first,
+                                          width: 70.0,
+                                          height: 70.0,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          dateTimeFormat('yMMMd',
+                                              listViewNoteListRow.createDate),
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          Container(
-                            width: double.infinity,
-                            height: 1.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).alternate,
+                            Container(
+                              width: double.infinity,
+                              height: 1.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).alternate,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ).animateOnPageLoad(
-                        animationsMap['columnOnPageLoadAnimation']!);
+                          ],
+                        ),
+                      ).animateOnPageLoad(
+                          animationsMap['columnOnPageLoadAnimation']!),
+                    );
                   },
                 ),
               );
