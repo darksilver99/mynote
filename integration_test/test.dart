@@ -11,8 +11,6 @@ void main() async {
   testWidgets('loginTest', (WidgetTester tester) async {
     _overrideOnError();
 
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: 'oosayaoo@hotmail.com', password: '0456045');
     await tester.pumpWidget(MyApp());
 
     await tester.pumpAndSettle();
