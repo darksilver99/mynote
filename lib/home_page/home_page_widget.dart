@@ -1,20 +1,19 @@
 import '/auth/supabase_auth/auth_util.dart';
 import '/backend/supabase/supabase.dart';
 import '/component/add_note_bottom_sheet/add_note_bottom_sheet_widget.dart';
-import '/component/confirm_custom_dialog/confirm_custom_dialog_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
+import '/flutter_flow/flutter_flow_swipeable_stack.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:async';
-import 'package:aligned_dialog/aligned_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:swipeable_card_stack/swipeable_card_stack.dart';
 import 'home_page_model.dart';
 export 'home_page_model.dart';
 
@@ -61,6 +60,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => _model.unfocusNode.canRequestFocus
           ? FocusScope.of(context).requestFocus(_model.unfocusNode)
@@ -90,8 +91,10 @@ class _HomePageWidgetState extends State<HomePageWidget>
             ).then((value) => safeSetState(() => _model.isSavedNote = value));
 
             if ((_model.isSavedNote != null) && _model.isSavedNote!) {
-              setState(() => _model.requestCompleter = null);
-              await _model.waitForRequestCompleted();
+              setState(() => _model.requestCompleter1 = null);
+              await _model.waitForRequestCompleted1();
+              setState(() => _model.requestCompleter2 = null);
+              await _model.waitForRequestCompleted2();
             }
 
             setState(() {});
@@ -99,8 +102,11 @@ class _HomePageWidgetState extends State<HomePageWidget>
           backgroundColor: FlutterFlowTheme.of(context).primary,
           elevation: 8.0,
           label: Text(
-            'add',
-            style: FlutterFlowTheme.of(context).bodyMedium,
+            'Add',
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'Readex Pro',
+                  color: FlutterFlowTheme.of(context).info,
+                ),
           ),
         ),
         appBar: AppBar(
@@ -172,263 +178,506 @@ class _HomePageWidgetState extends State<HomePageWidget>
         ),
         body: SafeArea(
           top: true,
-          child: FutureBuilder<List<NoteListRow>>(
-            future: (_model.requestCompleter ??= Completer<List<NoteListRow>>()
-                  ..complete(NoteListTable().queryRows(
-                    queryFn: (q) => q
-                        .eq(
-                          'create_by',
-                          currentUserUid,
-                        )
-                        .order('create_date'),
-                  )))
-                .future,
-            builder: (context, snapshot) {
-              // Customize what your widget looks like when it's loading.
-              if (!snapshot.hasData) {
-                return Center(
-                  child: SizedBox(
-                    width: 50.0,
-                    height: 50.0,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        FlutterFlowTheme.of(context).primary,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () async {
+                        if (FFAppState().isList) {
+                          setState(() {
+                            FFAppState().isList = false;
+                          });
+                        } else {
+                          setState(() {
+                            FFAppState().isList = true;
+                          });
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              8.0, 4.0, 8.0, 4.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              if (FFAppState().isList)
+                                Icon(
+                                  Icons.list_alt_rounded,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                  size: 30.0,
+                                ),
+                              if (!FFAppState().isList)
+                                Icon(
+                                  Icons.file_copy_rounded,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                  size: 30.0,
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }
-              List<NoteListRow> listViewNoteListRowList = snapshot.data!;
-              return RefreshIndicator(
-                onRefresh: () async {
-                  setState(() => _model.requestCompleter = null);
-                  await _model.waitForRequestCompleted();
-                },
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  scrollDirection: Axis.vertical,
-                  itemCount: listViewNoteListRowList.length,
-                  itemBuilder: (context, listViewIndex) {
-                    final listViewNoteListRow =
-                        listViewNoteListRowList[listViewIndex];
-                    return Builder(
-                      builder: (context) => InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          final _localAuth = LocalAuthentication();
-                          bool _isBiometricSupported =
-                              await _localAuth.isDeviceSupported();
-                          bool canCheckBiometrics =
-                              await _localAuth.canCheckBiometrics;
-                          if (_isBiometricSupported && canCheckBiometrics) {
-                            _model.isAuthen = await _localAuth.authenticate(
-                                localizedReason:
-                                    'Please authenticate to show data.',
-                                options: const AuthenticationOptions(
-                                    biometricOnly: true));
-                            setState(() {});
-                          }
-
-                          if (_model.isAuthen!) {
-                            context.pushNamed(
-                              'NoteDetailPage',
-                              queryParameters: {
-                                'noteParameter': serializeParam(
-                                  listViewNoteListRow,
-                                  ParamType.SupabaseRow,
-                                ),
-                              }.withoutNulls,
-                            );
-                          }
-
-                          setState(() {});
-                        },
-                        onDoubleTap: () async {
-                          await showAlignedDialog(
-                            context: context,
-                            isGlobal: true,
-                            avoidOverflow: false,
-                            targetAnchor: AlignmentDirectional(0.0, 0.0)
-                                .resolve(Directionality.of(context)),
-                            followerAnchor: AlignmentDirectional(0.0, 0.0)
-                                .resolve(Directionality.of(context)),
-                            builder: (dialogContext) {
-                              return Material(
-                                color: Colors.transparent,
-                                child: GestureDetector(
-                                  onTap: () =>
-                                      _model.unfocusNode.canRequestFocus
-                                          ? FocusScope.of(context)
-                                              .requestFocus(_model.unfocusNode)
-                                          : FocusScope.of(context).unfocus(),
-                                  child: ConfirmCustomDialogWidget(
-                                    title: 'Delete ?',
-                                    ok: 'Confirm',
-                                    cancel: 'Cancel',
-                                  ),
-                                ),
-                              );
-                            },
-                          ).then((value) =>
-                              safeSetState(() => _model.isConfirm = value));
-
-                          if ((_model.isConfirm != null) && _model.isConfirm!) {
-                            await NoteListTable().delete(
-                              matchingRows: (rows) => rows.eq(
-                                'id',
-                                listViewNoteListRow.id,
+                  ],
+                ),
+              ),
+              if (FFAppState().isList)
+                Expanded(
+                  child: FutureBuilder<List<NoteListRow>>(
+                    future: (_model.requestCompleter1 ??=
+                            Completer<List<NoteListRow>>()
+                              ..complete(NoteListTable().queryRows(
+                                queryFn: (q) => q
+                                    .eq(
+                                      'create_by',
+                                      currentUserUid,
+                                    )
+                                    .order('create_date'),
+                              )))
+                        .future,
+                    builder: (context, snapshot) {
+                      // Customize what your widget looks like when it's loading.
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: SizedBox(
+                            width: 50.0,
+                            height: 50.0,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                FlutterFlowTheme.of(context).primary,
                               ),
-                            );
-                            setState(() => _model.requestCompleter = null);
-                            await _model.waitForRequestCompleted();
-                          }
-
-                          setState(() {});
+                            ),
+                          ),
+                        );
+                      }
+                      List<NoteListRow> listViewNoteListRowList =
+                          snapshot.data!;
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          setState(() => _model.requestCompleter1 = null);
+                          await _model.waitForRequestCompleted1();
                         },
-                        onLongPress: () async {
-                          var confirmDialogResponse = await showDialog<bool>(
-                                context: context,
-                                builder: (alertDialogContext) {
-                                  return AlertDialog(
-                                    title: Text('Delete?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(
-                                            alertDialogContext, false),
-                                        child: Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(
-                                            alertDialogContext, true),
-                                        child: Text('Confirm'),
-                                      ),
-                                    ],
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          itemCount: listViewNoteListRowList.length,
+                          itemBuilder: (context, listViewIndex) {
+                            final listViewNoteListRow =
+                                listViewNoteListRowList[listViewIndex];
+                            return InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                context.pushNamed(
+                                  'NoteDetailPage',
+                                  queryParameters: {
+                                    'noteParameter': serializeParam(
+                                      listViewNoteListRow,
+                                      ParamType.SupabaseRow,
+                                    ),
+                                  }.withoutNulls,
+                                );
+                              },
+                              onLongPress: () async {
+                                var confirmDialogResponse =
+                                    await showDialog<bool>(
+                                          context: context,
+                                          builder: (alertDialogContext) {
+                                            return AlertDialog(
+                                              title: Text('Delete?'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          alertDialogContext,
+                                                          false),
+                                                  child: Text('Cancel'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          alertDialogContext,
+                                                          true),
+                                                  child: Text('Confirm'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ) ??
+                                        false;
+                                if (confirmDialogResponse) {
+                                  await NoteListTable().delete(
+                                    matchingRows: (rows) => rows.eq(
+                                      'id',
+                                      listViewNoteListRow.id,
+                                    ),
                                   );
-                                },
-                              ) ??
-                              false;
-                          if (confirmDialogResponse) {
-                            await NoteListTable().delete(
-                              matchingRows: (rows) => rows.eq(
-                                'id',
-                                listViewNoteListRow.id,
-                              ),
-                            );
-                            setState(() => _model.requestCompleter = null);
-                            await _model.waitForRequestCompleted();
-                          }
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              width: double.infinity,
-                              height: 100.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                              ),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 8.0, 16.0, 8.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
+                                  setState(
+                                      () => _model.requestCompleter1 = null);
+                                  await _model.waitForRequestCompleted1();
+                                  setState(
+                                      () => _model.requestCompleter2 = null);
+                                  await _model.waitForRequestCompleted2();
+                                }
+                              },
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    height: 100.0,
+                                    decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          16.0, 8.0, 16.0, 8.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          if (listViewNoteListRow.title !=
-                                                  null &&
-                                              listViewNoteListRow.title != '')
-                                            Expanded(
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
+                                          Expanded(
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                if (listViewNoteListRow.title !=
+                                                        null &&
+                                                    listViewNoteListRow.title !=
+                                                        '')
                                                   Expanded(
-                                                    child: Text(
-                                                      listViewNoteListRow
-                                                          .title!,
-                                                      maxLines: 2,
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            fontFamily:
-                                                                'Readex Pro',
-                                                            fontSize: 20.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            listViewNoteListRow
+                                                                .title!,
+                                                            maxLines: 2,
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  fontFamily:
+                                                                      'Readex Pro',
+                                                                  fontSize:
+                                                                      20.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
                                                           ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
-                                                ],
-                                              ),
+                                                if ((listViewNoteListRow
+                                                                .title ==
+                                                            null ||
+                                                        listViewNoteListRow
+                                                                .title ==
+                                                            '') &&
+                                                    (listViewNoteListRow
+                                                            .images.length >
+                                                        0))
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8.0),
+                                                    child: CachedNetworkImage(
+                                                      fadeInDuration: Duration(
+                                                          milliseconds: 500),
+                                                      fadeOutDuration: Duration(
+                                                          milliseconds: 500),
+                                                      imageUrl:
+                                                          listViewNoteListRow
+                                                              .images.first,
+                                                      width: 70.0,
+                                                      height: 70.0,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                              ],
                                             ),
-                                          if ((listViewNoteListRow.title ==
-                                                      null ||
-                                                  listViewNoteListRow.title ==
-                                                      '') &&
-                                              (listViewNoteListRow
-                                                      .images.length >
-                                                  0))
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: CachedNetworkImage(
-                                                fadeInDuration:
-                                                    Duration(milliseconds: 500),
-                                                fadeOutDuration:
-                                                    Duration(milliseconds: 500),
-                                                imageUrl: listViewNoteListRow
-                                                    .images.first,
-                                                width: 70.0,
-                                                height: 70.0,
-                                                fit: BoxFit.cover,
+                                          ),
+                                          Column(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                dateTimeFormat(
+                                                    'yMMMd',
+                                                    listViewNoteListRow
+                                                        .createDate),
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium,
                                               ),
-                                            ),
+                                            ],
+                                          ),
                                         ],
                                       ),
                                     ),
-                                    Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          dateTimeFormat('yMMMd',
-                                              listViewNoteListRow.createDate),
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium,
-                                        ),
-                                      ],
+                                  ),
+                                  Container(
+                                    width: double.infinity,
+                                    height: 1.0,
+                                    decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context)
+                                          .alternate,
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              ),
+                            ).animateOnPageLoad(
+                                animationsMap['columnOnPageLoadAnimation']!);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              if (!FFAppState().isList)
+                Expanded(
+                  child: FutureBuilder<List<NoteListRow>>(
+                    future: (_model.requestCompleter2 ??=
+                            Completer<List<NoteListRow>>()
+                              ..complete(NoteListTable().queryRows(
+                                queryFn: (q) => q
+                                    .eq(
+                                      'create_by',
+                                      currentUserUid,
+                                    )
+                                    .order('create_date'),
+                              )))
+                        .future,
+                    builder: (context, snapshot) {
+                      // Customize what your widget looks like when it's loading.
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: SizedBox(
+                            width: 50.0,
+                            height: 50.0,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                FlutterFlowTheme.of(context).primary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      List<NoteListRow> swipeableStackNoteListRowList =
+                          snapshot.data!;
+                      return FlutterFlowSwipeableStack(
+                        topCardHeightFraction: 0.72,
+                        middleCardHeightFraction: 0.68,
+                        bottomCardHeightFraction: 0.75,
+                        topCardWidthFraction: 0.9,
+                        middleCardWidthFraction: 0.85,
+                        bottomCardWidthFraction: 0.8,
+                        onSwipeFn: (index) {},
+                        onLeftSwipe: (index) {},
+                        onRightSwipe: (index) {},
+                        onUpSwipe: (index) {},
+                        onDownSwipe: (index) {},
+                        itemBuilder: (context, swipeableStackIndex) {
+                          final swipeableStackNoteListRow =
+                              swipeableStackNoteListRowList[
+                                  swipeableStackIndex];
+                          return InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              context.pushNamed(
+                                'NoteDetailPage',
+                                queryParameters: {
+                                  'noteParameter': serializeParam(
+                                    swipeableStackNoteListRow,
+                                    ParamType.SupabaseRow,
+                                  ),
+                                }.withoutNulls,
+                              );
+                            },
+                            child: Material(
+                              color: Colors.transparent,
+                              elevation: 3.0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  borderRadius: BorderRadius.circular(16.0),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 16.0, 16.0, 16.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 8.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              dateTimeFormat(
+                                                  'yMMMd',
+                                                  swipeableStackNoteListRow
+                                                      .createDate),
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodyMedium
+                                                  .override(
+                                                    fontFamily: 'Readex Pro',
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .primaryText,
+                                                    fontSize: 12.0,
+                                                  ),
+                                            ),
+                                            InkWell(
+                                              splashColor: Colors.transparent,
+                                              focusColor: Colors.transparent,
+                                              hoverColor: Colors.transparent,
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              onTap: () async {
+                                                var confirmDialogResponse =
+                                                    await showDialog<bool>(
+                                                          context: context,
+                                                          builder:
+                                                              (alertDialogContext) {
+                                                            return AlertDialog(
+                                                              title: Text(
+                                                                  'Delete?'),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          alertDialogContext,
+                                                                          false),
+                                                                  child: Text(
+                                                                      'Cancel'),
+                                                                ),
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          alertDialogContext,
+                                                                          true),
+                                                                  child: Text(
+                                                                      'Confirm'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        ) ??
+                                                        false;
+                                                if (confirmDialogResponse) {
+                                                  await NoteListTable().delete(
+                                                    matchingRows: (rows) =>
+                                                        rows.eq(
+                                                      'id',
+                                                      swipeableStackNoteListRow
+                                                          .id,
+                                                    ),
+                                                  );
+                                                  setState(() =>
+                                                      _model.requestCompleter1 =
+                                                          null);
+                                                  await _model
+                                                      .waitForRequestCompleted1();
+                                                  setState(() =>
+                                                      _model.requestCompleter2 =
+                                                          null);
+                                                  await _model
+                                                      .waitForRequestCompleted2();
+                                                }
+                                              },
+                                              child: Icon(
+                                                Icons.delete,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .error,
+                                                size: 24.0,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          swipeableStackNoteListRow.title!,
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'Readex Pro',
+                                                fontSize: 22.0,
+                                              ),
+                                        ),
+                                      ),
+                                      if (swipeableStackNoteListRow
+                                              .images.length >
+                                          0)
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: Image.network(
+                                            swipeableStackNoteListRow
+                                                .images.first,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                            Container(
-                              width: double.infinity,
-                              height: 1.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).alternate,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ).animateOnPageLoad(
-                          animationsMap['columnOnPageLoadAnimation']!),
-                    );
-                  },
+                          );
+                        },
+                        itemCount: swipeableStackNoteListRowList.length,
+                        controller: _model.swipeableStackController,
+                        enableSwipeUp: false,
+                        enableSwipeDown: false,
+                      );
+                    },
+                  ),
                 ),
-              );
-            },
+            ],
           ),
         ),
       ),

@@ -5,13 +5,22 @@ import 'package:integration_test/integration_test.dart';
 import 'package:my_note/main.dart';
 import 'package:my_note/flutter_flow/flutter_flow_util.dart';
 
+import 'package:provider/provider.dart';
+
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('loginTest', (WidgetTester tester) async {
     _overrideOnError();
 
-    await tester.pumpWidget(MyApp());
+    FFAppState.reset();
+    final appState = FFAppState();
+    await appState.initializePersistedState();
+
+    await tester.pumpWidget(ChangeNotifierProvider(
+      create: (context) => appState,
+      child: MyApp(),
+    ));
 
     await tester.pumpAndSettle();
     await tester.enterText(
