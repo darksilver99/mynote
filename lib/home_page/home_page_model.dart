@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 
 class HomePageModel extends FlutterFlowModel<HomePageWidget> {
@@ -21,6 +22,7 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
 
   final unfocusNode = FocusNode();
   Completer<List<NoteListRow>>? requestCompleter;
+  bool isAuthen = false;
   // Stores action output result for [Alert Dialog - Custom Dialog] action in Column widget.
   bool? isConfirm;
   // Stores action output result for [Bottom Sheet - AddNoteBottomSheet] action in FloatingActionButton widget.

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'home_page_model.dart';
 export 'home_page_model.dart';
@@ -217,15 +218,33 @@ class _HomePageWidgetState extends State<HomePageWidget>
                         hoverColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () async {
-                          context.pushNamed(
-                            'NoteDetailPage',
-                            queryParameters: {
-                              'noteParameter': serializeParam(
-                                listViewNoteListRow,
-                                ParamType.SupabaseRow,
-                              ),
-                            }.withoutNulls,
-                          );
+                          final _localAuth = LocalAuthentication();
+                          bool _isBiometricSupported =
+                              await _localAuth.isDeviceSupported();
+                          bool canCheckBiometrics =
+                              await _localAuth.canCheckBiometrics;
+                          if (_isBiometricSupported && canCheckBiometrics) {
+                            _model.isAuthen = await _localAuth.authenticate(
+                                localizedReason:
+                                    'Please authenticate to show data.',
+                                options: const AuthenticationOptions(
+                                    biometricOnly: true));
+                            setState(() {});
+                          }
+
+                          if (_model.isAuthen!) {
+                            context.pushNamed(
+                              'NoteDetailPage',
+                              queryParameters: {
+                                'noteParameter': serializeParam(
+                                  listViewNoteListRow,
+                                  ParamType.SupabaseRow,
+                                ),
+                              }.withoutNulls,
+                            );
+                          }
+
+                          setState(() {});
                         },
                         onDoubleTap: () async {
                           await showAlignedDialog(
@@ -320,51 +339,64 @@ class _HomePageWidgetState extends State<HomePageWidget>
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    if (listViewNoteListRow.title != null &&
-                                        listViewNoteListRow.title != '')
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
+                                    Expanded(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          if (listViewNoteListRow.title !=
+                                                  null &&
+                                              listViewNoteListRow.title != '')
                                             Expanded(
-                                              child: Text(
-                                                listViewNoteListRow.title!,
-                                                maxLines: 2,
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily:
-                                                              'Readex Pro',
-                                                          fontSize: 20.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.max,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      listViewNoteListRow
+                                                          .title!,
+                                                      maxLines: 2,
+                                                      style: FlutterFlowTheme
+                                                              .of(context)
+                                                          .bodyMedium
+                                                          .override(
+                                                            fontFamily:
+                                                                'Readex Pro',
+                                                            fontSize: 20.0,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                          if ((listViewNoteListRow.title ==
+                                                      null ||
+                                                  listViewNoteListRow.title ==
+                                                      '') &&
+                                              (listViewNoteListRow
+                                                      .images.length >
+                                                  0))
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: CachedNetworkImage(
+                                                fadeInDuration:
+                                                    Duration(milliseconds: 500),
+                                                fadeOutDuration:
+                                                    Duration(milliseconds: 500),
+                                                imageUrl: listViewNoteListRow
+                                                    .images.first,
+                                                width: 70.0,
+                                                height: 70.0,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                        ],
                                       ),
-                                    if ((listViewNoteListRow.title == null ||
-                                            listViewNoteListRow.title == '') &&
-                                        (listViewNoteListRow.images.length > 0))
-                                      ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: CachedNetworkImage(
-                                          fadeInDuration:
-                                              Duration(milliseconds: 500),
-                                          fadeOutDuration:
-                                              Duration(milliseconds: 500),
-                                          imageUrl:
-                                              listViewNoteListRow.images.first,
-                                          width: 70.0,
-                                          height: 70.0,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                                    ),
                                     Column(
                                       mainAxisSize: MainAxisSize.max,
                                       mainAxisAlignment: MainAxisAlignment.end,
